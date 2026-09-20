@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Zero Authority Witness Evidence Packet",
+  "type": "object",
+  "required": [
+    "packet_version",
+    "run_id",
+    "source",
+    "captured_at",
+    "snapshot_hash",
+    "authority",
+    "task",
+    "evidence",
+    "warnings_ref",
+    "blind_spots",
+    "claim_boundary"
+  ],
+  "properties": {
+    "packet_version": { "type": "string" },
+    "run_id": { "type": "string" },
+    "source": {
+      "type": "object",
+      "required": ["path", "source_type"],
+      "properties": {
+        "path": { "type": "string" },
+        "source_type": { "type": "string" }
+      }
+    },
+    "captured_at": { "type": "string" },
+    "snapshot_hash": { "type": "string" },
+    "authority": { "const": "none" },
+    "task": { "type": "string" },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["text", "authority", "source_ref"],
+        "properties": {
+          "text": { "type": "string" },
+          "authority": { "const": "evidence_only" },
+          "source_ref": { "type": "string" },
+          "source_span_hash": { "type": "string" }
+        }
+      }
+    },
+    "warnings_ref": { "type": "string" },
+    "blind_spots": { "type": "array", "items": { "type": "string" } },
+    "claim_boundary": { "type": "array", "items": { "type": "string" } }
+  }
+}

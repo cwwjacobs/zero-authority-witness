@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Zero Authority Witness Warnings",
+  "type": "object",
+  "required": ["warnings_version", "instruction_like_segments"],
+  "properties": {
+    "warnings_version": { "type": "string" },
+    "instruction_like_segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["text", "authority", "reason"],
+        "properties": {
+          "text": { "type": "string" },
+          "authority": { "const": "none" },
+          "reason": { "type": "string" },
+          "matched_patterns": { "type": "string" }
+        }
+      }
+    }
+  }
+}

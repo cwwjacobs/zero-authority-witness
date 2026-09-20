@@ -1,0 +1,8 @@
+{
+  "note": "Golden minimal fields for the injected sample (timestamps and run_id normalized in real golden tests).",
+  "expected_verdict": "PASS_WITH_NOTES",
+  "expected_warnings_min": 1,
+  "expected_evidence_count_min": 1,
+  "authority": "none",
+  "authority_granted": false
+}

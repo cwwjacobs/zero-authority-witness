@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Zero Authority Witness Proposed Action",
+  "type": "object",
+  "required": ["action_type", "target", "reason"],
+  "properties": {
+    "action_type": { "type": "string" },
+    "target": { "type": "string" },
+    "reason": { "type": "string" },
+    "requested_by": { "type": "string" },
+    "source_ref": { "type": "string" },
+    "data_leaving_boundary": { "type": "boolean" },
+    "persistence": { "type": "boolean" }
+  }
+}

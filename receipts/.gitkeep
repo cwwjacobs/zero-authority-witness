@@ -1,0 +1,5 @@
+# Receipts directory
+
+Place operator-signed or automated decision receipts here for long-term audit.
+This directory is intentionally kept out of the normal runs/ tree so that
+high-signal governance artifacts can be managed separately.

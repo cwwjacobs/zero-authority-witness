@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Zero Authority Witness Greenlight",
+  "type": "object",
+  "required": ["goal", "allowed", "not_allowed", "authority_owner"],
+  "properties": {
+    "goal": { "type": "string" },
+    "allowed": { "type": "array", "items": { "type": "string" } },
+    "not_allowed": { "type": "array", "items": { "type": "string" } },
+    "authority_owner": { "type": "string" },
+    "scope_notes": { "type": "string" }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Zero Authority Witness Allow Manifest",
+  "type": "object",
+  "required": ["allowed_actions", "denied_actions", "authority_owner"],
+  "properties": {
+    "allowed_actions": { "type": "array", "items": { "type": "string" } },
+    "denied_actions": { "type": "array", "items": { "type": "string" } },
+    "allowed_paths": { "type": "array", "items": { "type": "string" } },
+    "denied_paths": { "type": "array", "items": { "type": "string" } },
+    "allowed_origins": { "type": "array", "items": { "type": "string" } },
+    "denied_origins": { "type": "array", "items": { "type": "string" } },
+    "ttl": { "type": "string" },
+    "authority_owner": { "type": "string" }
+  }
+}

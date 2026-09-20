@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Zero Authority Witness Tool Descriptor Intake",
+  "type": "object",
+  "required": [
+    "descriptor_version",
+    "name",
+    "source",
+    "authority",
+    "risk_flags",
+    "canonicalization_status"
+  ],
+  "properties": {
+    "descriptor_version": {"type": "string"},
+    "name": {"type": "string"},
+    "description": {"type": "string"},
+    "input_schema": {"type": "object"},
+    "source": {"type": "object"},
+    "authority": {"const": "none"},
+    "risk_flags": {"type": "array", "items": {"type": "string"}},
+    "canonicalization_status": {"enum": ["DISCOVERED", "INTAKED", "MAPPED", "REBUILT_LOCAL", "TESTED", "RECEIPTED", "CANONICAL"]}
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Zero Authority Witness Receipt",
+  "type": "object",
+  "required": [
+    "receipt_version",
+    "run_id",
+    "created_at",
+    "task",
+    "source_path",
+    "snapshot_hash",
+    "artifact_hashes",
+    "artifacts",
+    "warnings_count",
+    "verdict",
+    "claim_boundary",
+    "blind_spots",
+    "authority_granted"
+  ],
+  "properties": {
+    "receipt_version": { "type": "string" },
+    "run_id": { "type": "string" },
+    "created_at": { "type": "string" },
+    "task": { "type": "string" },
+    "source_path": { "type": "string" },
+    "snapshot_hash": { "type": "string" },
+    "artifact_hashes": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "artifacts": { "type": "array", "items": { "type": "string" } },
+    "warnings_count": { "type": "integer" },
+    "verdict": { "type": "string" },
+    "claim_boundary": { "type": "array", "items": { "type": "string" } },
+    "blind_spots": { "type": "array", "items": { "type": "string" } },
+    "authority_granted": { "const": false }
+  }
+}

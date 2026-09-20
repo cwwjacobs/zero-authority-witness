@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: "Zero Authority Witness"
+message: "If you use this software, please cite it as below."
+abstract: "A receipt-bearing intake membrane that converts untrusted content into hash-receipted, data-only evidence before LLM reasoning or action. It reduces first-contact authority risk and never grants authority to external content; it does not solve prompt injection or guarantee safety."
+type: software
+authors:
+  - family-names: "Jacobs"
+    given-names: "Corey"
+    email: "coresynth@gmail.com"
+repository-code: "https://github.com/cwwjacobs/zero-authority-witness"
+license-url: "https://polyformproject.org/licenses/noncommercial/1.0.0/"
+keywords:
+  - "zero authority"
+  - "prompt injection risk reduction"
+  - "intake membrane"
+  - "data-authority separation"
+  - "evidence only"
+  - "receipts"
+  - "MCP tool intake"
+  - "tool poisoning"
+  - "PRISM protocol"
+version: "0.1.0-rc1"
+date-released: "2026-06-07"

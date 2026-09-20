@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zero-authority-witness"
+version = "0.1.0-rc1"
+description = "Zero Authority Witness — a receipt-bearing intake membrane that converts untrusted content into hash-receipted, data-only evidence before LLM reasoning or action."
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+  {name = "Corey Jacobs", email = "coresynth@gmail.com"}
+]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+zaw = "zaw.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["zaw*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.md", "*.json", "schemas/*.json", "docs/*.md"]
