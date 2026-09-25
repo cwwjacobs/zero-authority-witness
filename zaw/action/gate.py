@@ -57,6 +57,7 @@ def evaluate_action(
     warnings: Dict[str, Any] | None = None,
     evidence_packet: Dict[str, Any] | None = None,
     descriptor_binding: Dict[str, Any] | None = None,
+    witness_receipt: Dict[str, Any] | None = None,
 ) -> ActionDecision:
     greenlight = greenlight or {}
     caps = _cap.classify_action(action)
@@ -88,7 +89,7 @@ def evaluate_action(
     #    stale, mismatched, or unbound descriptor is rejected — the action would
     #    otherwise be authorized by a descriptor that no longer exists as witnessed.
     if action.get("descriptor") is not None or descriptor_binding is not None:
-        binding_result = _binding.verify_descriptor_binding(action, descriptor_binding)
+        binding_result = _binding.verify_descriptor_binding(action, descriptor_binding, witness_receipt)
         d.descriptor_binding = {
             "descriptor_source": action.get("descriptor"),
             "bound_digest": binding_result.bound_digest,
@@ -188,6 +189,7 @@ def decide_action(
     warnings: Dict[str, Any],
     evidence_packet: Dict[str, Any] | None = None,
     descriptor_binding: Dict[str, Any] | None = None,
+    witness_receipt: Dict[str, Any] | None = None,
 ) -> Verdict:
     """Back-compatible facade returning just the verdict string."""
-    return evaluate_action(action, greenlight, warnings, evidence_packet, descriptor_binding).verdict
+    return evaluate_action(action, greenlight, warnings, evidence_packet, descriptor_binding, witness_receipt).verdict

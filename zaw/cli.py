@@ -115,7 +115,20 @@ def _cmd_check_action(args: argparse.Namespace) -> int:
         except Exception:
             descriptor_binding = {}
 
-    decision = evaluate_action(action, greenlight, warnings, evidence_packet, descriptor_binding)
+    # Original witness evidence comes from the selected run, never a location
+    # supplied by the descriptor binding. Missing evidence fails closed.
+    witness_receipt = None
+    if action.get("descriptor") is not None or descriptor_binding is not None:
+        try:
+            witness_receipt = json.loads(
+                (evidence_path.parent / "receipt.json").read_text(encoding="utf-8")
+            )
+        except (OSError, ValueError):
+            pass
+
+    decision = evaluate_action(
+        action, greenlight, warnings, evidence_packet, descriptor_binding, witness_receipt
+    )
 
     print(f"Action check verdict: {decision.verdict}")
     print(f"Action: {action.get('action_type')} -> {action.get('target')}")

@@ -146,6 +146,9 @@ def witness_tool_descriptor(
         "blind_spots": packet["blind_spots"],
         "authority_granted": False,
     }
+    receipt["artifact_hashes"] = _hash.build_artifact_hashes(
+        run_dir, [name for name in receipt["artifacts"] if name != "receipt.json"]
+    )
     (run_dir / "receipt.json").write_text(
         json.dumps(receipt, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",

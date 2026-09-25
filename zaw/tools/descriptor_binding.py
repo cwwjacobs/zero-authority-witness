@@ -7,16 +7,17 @@ descriptor whose identity changed between witness/fetch and action time is
 rejected at the gate (rug-pull / TOCTOU close, THREAT_MODEL.md sections 3 and 8).
 
 The binding mirrors the repo's existing receipt model: a descriptor is
-identified by its source (path or URL, as recorded in the witness receipt's
-``source_path``) plus the ``sha256:`` digest of the witnessed bytes.
+identified by its source (local materialized path, as recorded in the witness receipt's
+``source_path``) plus the ``sha256:`` digest of the captured UTF-8 text.
 
 Claim boundary: a valid binding proves only that the descriptor is
-byte-identical to what was witnessed. It does not prove the descriptor is
+identical to the captured UTF-8 text that was witnessed. It does not prove the descriptor is
 safe, it grants no authority, and an Operator can still ignore the receipt.
 """
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -28,7 +29,7 @@ from ..receipt import now_iso
 BINDING_VERSION = "0.1"
 
 BINDING_CLAIM_BOUNDARY = [
-    "A valid binding proves only that the descriptor is byte-identical to what was witnessed.",
+    "A valid binding proves only that the descriptor is identical to the captured UTF-8 text that was witnessed.",
     "It does not prove the descriptor is safe or trustworthy.",
     "It grants no authority; the Witness never grants authority.",
 ]
@@ -39,6 +40,7 @@ CHANGED = "changed"
 STALE_UNAVAILABLE = "stale_unavailable"
 MISSING_BINDING = "missing_binding"
 INVALID_BINDING = "invalid_binding"
+WITNESS_MISMATCH = "witness_mismatch"
 SOURCE_MISMATCH = "source_mismatch"
 UNDECLARED_DESCRIPTOR = "undeclared_descriptor"
 NOT_REQUIRED = "not_required"
@@ -65,7 +67,7 @@ def build_descriptor_binding(
     Bind a descriptor identity (source + digest) for later action gating.
 
     ``descriptor_source`` is the fetch identity as the witness receipt records
-    it (path or URL); ``bound_digest`` is the witness-time ``sha256:`` digest.
+    it (local materialized path); ``bound_digest`` is the witness-time ``sha256:`` digest.
     """
     return {
         "binding_version": BINDING_VERSION,
@@ -94,8 +96,10 @@ def current_descriptor_digest(descriptor_source: str) -> Optional[str]:
 def verify_descriptor_binding(
     action: Dict[str, Any],
     binding: Optional[Dict[str, Any]],
+    witness_receipt: Optional[Dict[str, Any]] = None,
 ) -> BindingVerification:
     """
+    The caller must retain and supply the original witness receipt separately.
     Re-check, at action time, the descriptor an action depends on against the
     digest bound at witness time. Fail closed: anything short of an exact
     re-verified digest match is not verified.
@@ -125,15 +129,17 @@ def verify_descriptor_binding(
     bound_source = binding.get("descriptor_source") if isinstance(binding, dict) else None
     if (
         not isinstance(bound_digest, str)
-        or not bound_digest.startswith("sha256:")
+        or re.fullmatch(r"sha256:[0-9a-f]{64}", bound_digest) is None
+        or binding.get("binding_version") != BINDING_VERSION
         or not isinstance(bound_source, str)
         or not bound_source
     ):
         return BindingVerification(
             False,
             INVALID_BINDING,
-            "The supplied binding is malformed (needs descriptor_source and a "
-            "sha256: bound_digest); an invalid binding is not a basis to act.",
+            "The supplied binding is malformed (needs supported binding_version, "
+            "descriptor_source and a complete sha256: digest); an invalid "
+            "binding is not a basis to act.",
         )
 
     if bound_source != str(descriptor_ref):
@@ -142,6 +148,28 @@ def verify_descriptor_binding(
             SOURCE_MISMATCH,
             f"The binding is for {bound_source!r} but the action depends on "
             f"{descriptor_ref!r}; a binding for a different descriptor proves nothing.",
+            bound_digest=bound_digest,
+        )
+
+    # The receipt is supplied independently by the caller, not located through
+    # attacker-editable binding fields. Retaining this original evidence is the
+    # caller's trust boundary; this check is not a receipt signature.
+    artifact_hashes = (
+        witness_receipt.get("artifact_hashes")
+        if isinstance(witness_receipt, dict) else None
+    )
+    if (
+        not isinstance(witness_receipt, dict)
+        or witness_receipt.get("source_path") != bound_source
+        or witness_receipt.get("snapshot_hash") != bound_digest
+        or not isinstance(artifact_hashes, dict)
+        or artifact_hashes.get("source_snapshot.txt") != bound_digest
+    ):
+        return BindingVerification(
+            False,
+            WITNESS_MISMATCH,
+            "The binding is not supported by the retained witness receipt's "
+            "source, snapshot digest, and snapshot artifact hash.",
             bound_digest=bound_digest,
         )
 
@@ -168,7 +196,7 @@ def verify_descriptor_binding(
     return BindingVerification(
         True,
         VERIFIED,
-        "Descriptor is byte-identical to what was witnessed.",
+        "Descriptor is identical to the captured UTF-8 text that was witnessed.",
         bound_digest=bound_digest,
         current_digest=current,
     )

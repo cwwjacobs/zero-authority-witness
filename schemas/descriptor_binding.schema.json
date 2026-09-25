@@ -10,7 +10,7 @@
     "claim_boundary"
   ],
   "properties": {
-    "binding_version": {"type": "string"},
+    "binding_version": {"type": "string", "const": "0.1"},
     "descriptor_source": {"type": "string"},
     "bound_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
     "bound_at": {"type": "string"},
