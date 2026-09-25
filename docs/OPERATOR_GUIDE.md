@@ -25,6 +25,11 @@
    ```
    python3 -m zaw.cli check-action proposed.json --greenlight samples/greenlight.json --evidence runs/.../evidence_packet.json
    ```
+   If the action depends on a witnessed tool/MCP descriptor, declare it in the action's `descriptor` field and pass the run's binding so the descriptor is re-verified at action time:
+   ```
+   python3 -m zaw.cli check-action proposed.json --greenlight samples/greenlight.json --evidence runs/.../evidence_packet.json --descriptor-binding runs/.../descriptor_binding.json
+   ```
+   A descriptor that changed since witnessing is BLOCKed. The binding proves byte-identity only — review the receipt either way.
 6. Only proceed with actions that receive PASS (or that you have explicitly approved after a REQUIRES_OPERATOR_APPROVAL receipt).
 
 ## Greenlight and Scope

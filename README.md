@@ -55,6 +55,16 @@ python3 -m zaw.cli check-action samples/proposed_action_bad.json --greenlight sa
 
 A hostile `check-action` should return `BLOCK` with a non-zero exit code. That is intentional blocking behavior, not a script failure.
 
+## Descriptor binding (TOCTOU hardening)
+
+Witnessing a tool/MCP descriptor (`zaw witness`-family, `witness_tool_descriptor`) also writes `descriptor_binding.json` next to the run receipt: the descriptor's source identity and its witness-time `sha256:` digest. An action that depends on a descriptor can declare it via the action's `descriptor` field and be gated against that binding:
+
+```bash
+python3 -m zaw.cli check-action proposed.json --greenlight samples/greenlight.json --evidence <run-dir>/evidence_packet.json --descriptor-binding <run-dir>/descriptor_binding.json
+```
+
+At action time the descriptor's current digest is re-checked against the bound one. A changed, missing, or unverifiable descriptor — or a missing, malformed, or mismatched binding — returns `BLOCK`. A valid binding proves only that the descriptor is byte-identical to what was witnessed; it does not prove the descriptor is safe, and it grants no authority.
+
 ## Claim boundary
 
 ZAW reduces first-contact authority risk on witnessed paths. It does not fully solve prompt injection, guarantee safety, prove that sources are trustworthy, prevent all exfiltration, or secure arbitrary tools.

@@ -94,6 +94,7 @@ The attacker wants untrusted content (web page, document, MCP tool descriptor, J
 - Evidence is always labeled `evidence_only`; the safe prompt repeats the boundary language.
 - The Authority Membrane and Action Gate can return BLOCK or REQUIRES_OPERATOR_APPROVAL when scope delta or untrusted causality is detected.
 - Tool descriptors are witnessed and never auto-canonicalized.
+- A witnessed tool descriptor can be bound by digest to the action gate (`descriptor_binding.json`); at action time the descriptor's current digest is re-checked and a changed, missing, or unverifiable identity is BLOCKed. This detects the rug-pull at use time; it does not prevent the descriptor from changing and says nothing about its safety.
 - Witness Views are designed to show the Operator what the Witness actually saw (raw artifacts + warnings + blind spots), not a comforting summary.
 - All major artifacts carry the claim boundary and blind spots.
 - Receipts are required; `authority_granted` is explicitly false in the standard receipt.

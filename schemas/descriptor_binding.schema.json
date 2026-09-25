@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Zero Authority Witness Descriptor Binding",
+  "type": "object",
+  "required": [
+    "binding_version",
+    "descriptor_source",
+    "bound_digest",
+    "bound_at",
+    "claim_boundary"
+  ],
+  "properties": {
+    "binding_version": {"type": "string"},
+    "descriptor_source": {"type": "string"},
+    "bound_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "bound_at": {"type": "string"},
+    "claim_boundary": {"type": "array", "items": {"type": "string"}}
+  }
+}
