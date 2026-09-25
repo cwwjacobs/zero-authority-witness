@@ -12,6 +12,10 @@ from typing import Dict, Any, Optional
 
 from .core import run_witness
 from .cli import main as cli_main  # for programmatic CLI if desired
+from .tools.descriptor_binding import (
+    build_descriptor_binding as _build_descriptor_binding,
+    verify_descriptor_binding as _verify_descriptor_binding,
+)
 from .tools.descriptor_witness import witness_tool_descriptor as _witness_tool_descriptor
 
 
@@ -55,6 +59,16 @@ def witness_tool_descriptor(
 ) -> Path:
     """Witness a third-party tool/MCP descriptor as untrusted intake."""
     return _witness_tool_descriptor(Path(descriptor_path), Path(runs_dir))
+
+
+def build_descriptor_binding(descriptor_source: str, bound_digest: str) -> Dict[str, Any]:
+    """Bind a witnessed descriptor identity (source + sha256: digest) for action gating."""
+    return _build_descriptor_binding(descriptor_source, bound_digest)
+
+
+def verify_descriptor_binding(action: Dict[str, Any], binding: Optional[Dict[str, Any]]):
+    """Re-check an action's descriptor against its bound digest at action time."""
+    return _verify_descriptor_binding(action, binding)
 
 
 def build_safe_prompt_from_run(run_dir: Path) -> str:

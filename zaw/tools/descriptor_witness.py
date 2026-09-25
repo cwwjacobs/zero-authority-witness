@@ -17,6 +17,7 @@ from .. import hash_chain as _hash
 from .. import snapshot as _snap
 from ..receipt import now_iso
 from .canonicalization import initial_status_for_third_party
+from .descriptor_binding import build_descriptor_binding
 from .risk_classifier import classify_descriptor
 
 
@@ -113,6 +114,12 @@ def witness_tool_descriptor(
         encoding="utf-8",
     )
 
+    binding = build_descriptor_binding(str(descriptor_path), snapshot_hash)
+    (run_dir / "descriptor_binding.json").write_text(
+        json.dumps(binding, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
     receipt = {
         "receipt_version": "0.1",
         "run_id": run_id,
@@ -128,6 +135,7 @@ def witness_tool_descriptor(
             "warnings.json",
             "tool_descriptor_intake.json",
             "evidence_packet.json",
+            "descriptor_binding.json",
             "receipt.json",
         ],
         "warnings_count": len(segments),

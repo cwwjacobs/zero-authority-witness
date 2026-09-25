@@ -49,6 +49,12 @@ def main(argv: list[str] | None = None) -> int:
     p_check.add_argument("action", help="Path to proposed_action JSON")
     p_check.add_argument("--greenlight", required=True)
     p_check.add_argument("--evidence", required=True)
+    p_check.add_argument(
+        "--descriptor-binding",
+        default=None,
+        help="Optional path to descriptor_binding.json; binds the witnessed "
+        "descriptor digest to this action (TOCTOU re-check at action time)",
+    )
     p_check.set_defaults(func=_cmd_check_action)
 
     args = parser.parse_args(argv)
@@ -99,7 +105,17 @@ def _cmd_check_action(args: argparse.Namespace) -> int:
     except Exception:
         pass
 
-    decision = evaluate_action(action, greenlight, warnings, evidence_packet)
+    # An explicitly supplied binding that cannot be loaded is treated as an
+    # invalid binding (fail closed), never as no binding at all.
+    descriptor_binding = None
+    binding_arg = getattr(args, "descriptor_binding", None)
+    if binding_arg:
+        try:
+            descriptor_binding = json.loads(Path(binding_arg).read_text(encoding="utf-8"))
+        except Exception:
+            descriptor_binding = {}
+
+    decision = evaluate_action(action, greenlight, warnings, evidence_packet, descriptor_binding)
 
     print(f"Action check verdict: {decision.verdict}")
     print(f"Action: {action.get('action_type')} -> {action.get('target')}")
@@ -107,6 +123,8 @@ def _cmd_check_action(args: argparse.Namespace) -> int:
         print(f"Capabilities: {', '.join(decision.capabilities)} (severity: {decision.severity})")
     if decision.tainted:
         print(f"Untrusted provenance: operand quotes witnessed evidence ({', '.join(decision.taint_matches[:3])})")
+    if decision.descriptor_binding is not None:
+        print(f"Descriptor binding: {decision.descriptor_binding['verification']}")
     for r in decision.reasons:
         print(f"  - {r}")
 
@@ -124,6 +142,7 @@ def _cmd_check_action(args: argparse.Namespace) -> int:
                 capabilities=decision.capabilities,
                 tainted=decision.tainted,
                 taint_matches=decision.taint_matches,
+                descriptor_binding=decision.descriptor_binding,
             )
             write_action_receipt(run_dir, receipt)
     except Exception:
