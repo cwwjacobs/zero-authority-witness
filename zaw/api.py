@@ -66,9 +66,16 @@ def build_descriptor_binding(descriptor_source: str, bound_digest: str) -> Dict[
     return _build_descriptor_binding(descriptor_source, bound_digest)
 
 
-def verify_descriptor_binding(action: Dict[str, Any], binding: Optional[Dict[str, Any]]):
-    """Re-check an action's descriptor against its bound digest at action time."""
-    return _verify_descriptor_binding(action, binding)
+def verify_descriptor_binding(
+    action: Dict[str, Any],
+    binding: Optional[Dict[str, Any]],
+    witness_receipt: Optional[Dict[str, Any]] = None,
+):
+    """Re-check a descriptor against independently retained witness evidence.
+
+    Descriptor verification fails closed when the original receipt is omitted.
+    """
+    return _verify_descriptor_binding(action, binding, witness_receipt)
 
 
 def build_safe_prompt_from_run(run_dir: Path) -> str:
@@ -80,10 +87,14 @@ def check_action(
     action_path: Path | str,
     greenlight_path: Path | str,
     evidence_path: Path | str,
+    *,
+    descriptor_binding_path: Path | str | None = None,
 ) -> int:
     """
     Programmatic access to the check-action logic.
     Returns the exit-code style verdict (0=ok-ish, 1=BLOCK, 2=REQUIRES...).
+    Descriptor actions require a binding and the receipt alongside the selected
+    evidence packet, matching the CLI's retained-evidence boundary.
     """
     from .cli import _cmd_check_action
     import argparse
@@ -92,5 +103,8 @@ def check_action(
         action=str(action_path),
         greenlight=str(greenlight_path),
         evidence=str(evidence_path),
+        descriptor_binding=(
+            str(descriptor_binding_path) if descriptor_binding_path is not None else None
+        ),
     )
     return _cmd_check_action(args)
