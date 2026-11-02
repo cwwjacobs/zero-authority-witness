@@ -25,6 +25,11 @@
    ```
    python3 -m zaw.cli check-action proposed.json --greenlight samples/greenlight.json --evidence runs/.../evidence_packet.json
    ```
+   If the action depends on a witnessed tool/MCP descriptor, declare it in the action's `descriptor` field and pass the run's binding so the descriptor is re-verified at action time:
+   ```
+   python3 -m zaw.cli check-action proposed.json --greenlight samples/greenlight.json --evidence runs/.../evidence_packet.json --descriptor-binding runs/.../descriptor_binding.json
+   ```
+   A descriptor that changed since witnessing is BLOCKed. The binding proves captured text identity against the retained witness receipt only — review the receipt either way.
 6. Only proceed with actions that receive PASS (or that you have explicitly approved after a REQUIRES_OPERATOR_APPROVAL receipt).
 
 ## Greenlight and Scope
@@ -62,3 +67,7 @@ The system is designed to make the bad path visible and expensive. It cannot mak
 ---
 
 Use the Witness. Read the receipts. The Operator holds authority.
+Descriptor checks require the original operator-retained witness receipt; replacing
+the descriptor and binding alone cannot replace that witnessed identity. Entire
+evidence-store replacement is outside this unsigned integrity model. Remote
+descriptors must be materialized locally; no live remote re-fetch is implemented.

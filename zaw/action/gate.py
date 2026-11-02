@@ -11,6 +11,10 @@ two independent axes plus the mutation guard:
                   self-reported source label.
   * mutation    — direct attempts to mutate protected authority/state
                   (zaw/authority/mutation_guard.py).
+  * binding     — when an action depends on a witnessed/fetched tool
+                  descriptor, the descriptor's digest is re-checked at action
+                  time against the witness-time binding and any change is
+                  rejected (zaw/tools/descriptor_binding.py, TOCTOU).
 
 Verdicts: PASS / WARN / BLOCK / REQUIRES_OPERATOR_APPROVAL.
 
@@ -27,6 +31,7 @@ from typing import Any, Dict, List, Literal
 
 from ..authority import capability as _cap
 from ..authority import mutation_guard as _mut
+from ..tools import descriptor_binding as _binding
 from . import causality as _causality
 
 Verdict = Literal["PASS", "WARN", "BLOCK", "REQUIRES_OPERATOR_APPROVAL"]
@@ -43,6 +48,7 @@ class ActionDecision:
     tainted: bool = False
     taint_matches: List[str] = field(default_factory=list)
     severity: str = "none"
+    descriptor_binding: Dict[str, Any] | None = None
 
 
 def evaluate_action(
@@ -50,6 +56,8 @@ def evaluate_action(
     greenlight: Dict[str, Any] | None = None,
     warnings: Dict[str, Any] | None = None,
     evidence_packet: Dict[str, Any] | None = None,
+    descriptor_binding: Dict[str, Any] | None = None,
+    witness_receipt: Dict[str, Any] | None = None,
 ) -> ActionDecision:
     greenlight = greenlight or {}
     caps = _cap.classify_action(action)
@@ -75,6 +83,25 @@ def evaluate_action(
     )
 
     # --- BLOCK rules (forbidden promotions / kernel violations), first match wins ---
+
+    # 0. TOCTOU binding: an action that depends on a witnessed/fetched tool
+    #    descriptor is gated on that descriptor's bound identity. A changed,
+    #    stale, mismatched, or unbound descriptor is rejected — the action would
+    #    otherwise be authorized by a descriptor that no longer exists as witnessed.
+    if action.get("descriptor") is not None or descriptor_binding is not None:
+        binding_result = _binding.verify_descriptor_binding(action, descriptor_binding, witness_receipt)
+        d.descriptor_binding = {
+            "descriptor_source": action.get("descriptor"),
+            "bound_digest": binding_result.bound_digest,
+            "current_digest": binding_result.current_digest,
+            "verification": binding_result.status,
+        }
+        if not binding_result.verified:
+            d.verdict = "BLOCK"
+            d.reasons.append(
+                f"Descriptor binding failed ({binding_result.status}): {binding_result.detail}"
+            )
+            return d
 
     # 1. Direct attempt to mutate protected authority/state.
     if "state_mutation" in caps or mutation_hits:
@@ -161,6 +188,8 @@ def decide_action(
     greenlight: Dict[str, Any],
     warnings: Dict[str, Any],
     evidence_packet: Dict[str, Any] | None = None,
+    descriptor_binding: Dict[str, Any] | None = None,
+    witness_receipt: Dict[str, Any] | None = None,
 ) -> Verdict:
     """Back-compatible facade returning just the verdict string."""
-    return evaluate_action(action, greenlight, warnings, evidence_packet).verdict
+    return evaluate_action(action, greenlight, warnings, evidence_packet, descriptor_binding, witness_receipt).verdict

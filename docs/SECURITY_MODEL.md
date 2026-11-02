@@ -17,6 +17,7 @@
 - First-contact prompt injection and obvious hidden instructions in the staged content.
 - Classic tool descriptor poisoning (instructions in description or schema fields).
 - Attempts to launder evidence into policy, allowlists, or Greenlight without Operator involvement (via the Authority Membrane and action gate).
+- Rug-pulls on locally materialized tool/MCP descriptors that are gated through the action gate: the descriptor's digest is re-checked against `descriptor_binding.json` at action time and a changed identity is BLOCKed (detection at use time, not prevention of change).
 - Silent mutation of protected state by untrusted content.
 - Exfiltration via generated reports (render guard + inert HTML).
 
@@ -26,7 +27,7 @@
 - Novel or heavily obfuscated instructions that the simple pattern detector misses.
 - Supply-chain attacks against the Python stdlib or the host OS.
 - Operator error (ignoring warnings, approving dangerous actions after a REQUIRES receipt, accumulating "temporary" trust).
-- TOCTOU on live remote sources unless the Operator uses snapshot delta and re-witnesses.
+- TOCTOU on live remote sources unless the Operator uses snapshot delta, re-witnesses, or (for locally materialized tool/MCP descriptors) gates the action on `descriptor_binding.json`.
 - Anything after the safe prompt leaves the Witness (the model can still be socially engineered by the *evidence* it is shown).
 
 ## Failure Modes
@@ -47,3 +48,7 @@
 This is a membrane, not a fortress. Its job is to make the boundary legible and to force explicit Operator acts where authority would otherwise leak.
 
 See also THREAT_MODEL.md and CLAIM_BOUNDARY.md.
+Descriptor checks require the original operator-retained witness receipt; replacing
+the descriptor and binding alone cannot replace that witnessed identity. Entire
+evidence-store replacement is outside this unsigned integrity model. Remote
+descriptors must be materialized locally; no live remote re-fetch is implemented.

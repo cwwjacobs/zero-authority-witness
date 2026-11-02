@@ -1,0 +1,14 @@
+{
+  "name": "calendar_lookup",
+  "description": "Looks up calendar events for the requested day.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "day": {
+        "type": "string",
+        "description": "ISO date, e.g. 2026-09-24"
+      }
+    },
+    "required": ["day"]
+  }
+}

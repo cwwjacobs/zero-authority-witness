@@ -55,6 +55,29 @@ python3 -m zaw.cli check-action samples/proposed_action_bad.json --greenlight sa
 
 A hostile `check-action` should return `BLOCK` with a non-zero exit code. That is intentional blocking behavior, not a script failure.
 
+## Descriptor binding (TOCTOU hardening)
+
+Witnessing a tool/MCP descriptor (`zaw witness`-family, `witness_tool_descriptor`) also writes `descriptor_binding.json` next to the run receipt: the descriptor's source identity and its witness-time `sha256:` digest. An action that depends on a descriptor can declare it via the action's `descriptor` field and be gated against that binding:
+
+```bash
+python3 -m zaw.cli check-action proposed.json --greenlight samples/greenlight.json --evidence <run-dir>/evidence_packet.json --descriptor-binding <run-dir>/descriptor_binding.json
+```
+
+At action time the descriptor's current digest is re-checked against the bound one. A changed, missing, or unverifiable descriptor — or a missing, malformed, or mismatched binding — returns `BLOCK`. A valid binding proves only that the descriptor is identical to the captured UTF-8 text that was witnessed; it does not prove the descriptor is safe, and it grants no authority.
+
+Descriptor binding checks apply to **local materialized descriptors**; remote
+URL/MCP identities cannot be re-fetched by this verifier and fail closed. The CLI
+uses `receipt.json` beside the explicitly selected `--evidence` packet as the
+retained witness record. API callers must pass that original record separately
+as `witness_receipt` to `evaluate_action` / `verify_descriptor_binding`. A binding
+alone is insufficient. Its source and digest must match the receipt's source,
+snapshot digest, and snapshot artifact hash before checking the current source.
+Retain the original receipt in operator-controlled storage: these receipts are
+not signed, and replacing the entire evidence store is outside this guarantee.
+The comparison covers captured UTF-8 text (invalid bytes decode with replacement),
+not arbitrary binary byte identity, and it does not make execution atomic with
+the check or grant authority.
+
 ## Claim boundary
 
 ZAW reduces first-contact authority risk on witnessed paths. It does not fully solve prompt injection, guarantee safety, prove that sources are trustworthy, prevent all exfiltration, or secure arbitrary tools.

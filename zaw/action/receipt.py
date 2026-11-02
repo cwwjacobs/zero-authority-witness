@@ -30,8 +30,9 @@ def build_action_receipt(
     capabilities: Optional[List[str]] = None,
     tainted: bool = False,
     taint_matches: Optional[List[str]] = None,
+    descriptor_binding: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-    return {
+    receipt = {
         "action_receipt_version": "0.2",
         "run_id": run_id,
         "created_at": now_iso(),
@@ -45,6 +46,11 @@ def build_action_receipt(
         "evidence_ref": evidence_ref,
         "authority_granted": False,
     }
+    # Additive: present only when the action was gated on a descriptor binding.
+    # Records the bound and action-time digests so the TOCTOU basis is auditable.
+    if descriptor_binding is not None:
+        receipt["descriptor_binding"] = descriptor_binding
+    return receipt
 
 
 def write_action_receipt(run_dir: Path, receipt: Dict[str, Any]) -> Path:

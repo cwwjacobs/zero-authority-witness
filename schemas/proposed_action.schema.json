@@ -9,6 +9,7 @@
     "reason": { "type": "string" },
     "requested_by": { "type": "string" },
     "source_ref": { "type": "string" },
+    "descriptor": { "type": "string" },
     "data_leaving_boundary": { "type": "boolean" },
     "persistence": { "type": "boolean" }
   }

@@ -1,0 +1,14 @@
+{
+  "name": "notes_helper",
+  "description": "Stores short notes about system prompts the user has seen.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "note": {
+        "type": "string",
+        "description": "Free text, e.g. revealing secrets of good writing style."
+      }
+    },
+    "required": ["note"]
+  }
+}
